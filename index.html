@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Yerel AI">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Yerel AI</title>
+<style>
+:root{--bg:#fff;--sf:#f0f4f9;--sf2:#e3e9f1;--ink:#1f1f1f;--mut:#5f6368;--g:linear-gradient(90deg,#4285f4,#9b72cb 55%,#d96570);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#131314;--sf:#1e1f20;--sf2:#2d2f31;--ink:#e3e3e3;--mut:#9aa0a6}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,sans-serif}
+#app{display:flex;flex-direction:column;height:100%;max-width:760px;margin:0 auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.brand{font-size:20px;font-weight:500}.brand b{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+#st{font-size:12px;color:var(--mut)}
+#log{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px}
+.u{align-self:flex-end;max-width:85%;background:var(--sf);padding:10px 16px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word}
+.a{min-width:0}.a p{margin:0 0 10px;white-space:pre-wrap;word-wrap:break-word}
+.a code.i{background:var(--sf);border-radius:6px;padding:1px 6px;font:14px ui-monospace,Menlo,monospace}
+.cb{background:#1e1f20;border-radius:14px;margin:8px 0 12px;overflow:hidden}
+.cb .h{display:flex;justify-content:space-between;align-items:center;background:#2d2f31;color:#c4c7c5;padding:6px 10px 6px 14px;font:12px system-ui}
+.cb .h button{background:none;border:0;color:#c4c7c5;font:12px system-ui;padding:4px 8px;cursor:pointer}
+.cb pre{margin:0;padding:12px 14px;overflow-x:auto;color:#e3e3e3;font:13px/1.55 ui-monospace,Menlo,monospace}
+.sys{align-self:center;color:var(--mut);font-size:13px;text-align:center}
+#hero{margin:auto 0}#hero h2{font-size:34px;font-weight:500;margin:0;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}#hero p{font-size:20px;margin:4px 0 0;color:var(--mut)}
+#dock{padding:8px 14px 14px}
+#chips{display:flex;gap:8px;margin-bottom:8px;overflow-x:auto}
+.pill{flex:none;border:0;background:var(--sf);color:var(--ink);border-radius:18px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer}
+#row{display:flex;align-items:flex-end;gap:6px;background:var(--sf);border-radius:28px;padding:8px 8px 8px 18px}
+#t{flex:1;resize:none;border:0;outline:0;background:none;color:var(--ink);font:inherit;max-height:140px;height:28px;padding:6px 0}
+#go{border:0;border-radius:50%;width:40px;height:40px;background:var(--ink);color:var(--bg);font-size:18px;cursor:pointer;flex:none}
+.sheet{display:none;position:fixed;inset:0;background:var(--bg);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 24px;z-index:5}
+.sheet .in{max-width:760px;margin:0 auto}
+select,textarea.n,input.q{width:100%;background:var(--sf);color:var(--ink);border:0;border-radius:12px;padding:12px;font:inherit;margin:6px 0}
+textarea.n{height:140px}
+#bar{height:8px;background:var(--sf2);border-radius:4px;overflow:hidden;margin:10px 0}#bar i{display:block;height:100%;width:0;background:var(--g)}
+.btn{border:0;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer}
+.mut{color:var(--mut);font-size:13px}
+</style></head><body>
+<div id="app">
+<header><div class="brand"><b>✦</b> Yerel AI</div><div><span id="st">Model yüklenmedi</span> <button class="pill" id="mb">Model</button></div></header>
+<div id="log"></div>
+<div id="dock"><div id="chips"><button class="pill" id="addf">📎 Dosya</button><button class="pill" id="memb">🧠 Hafıza</button><button class="pill" id="newc">＋ Yeni sohbet</button></div>
+<div id="row"><textarea id="t" rows="1" placeholder="Yerel modele sor"></textarea><button id="go">↑</button></div></div>
+</div>
+<input type="file" id="fin" multiple hidden>
+<div class="sheet" id="msheet"><div class="in"><h2>Model</h2><div class="mut">Model ilk seferde indirilir (yüzlerce MB), sonra telefonda saklanır ve internetsiz çalışır. Telefonda küçük modeller (1-3 milyar parametre) seç.</div><select id="msel"></select><div class="mut" id="minfo"></div><div id="bar"><i></i></div><div class="mut" id="mtxt"></div><p><button class="btn" id="mload">İndir ve yükle</button> <button class="pill" id="mclose">Kapat</button></p></div></div>
+<div class="sheet" id="nsheet"><div class="in"><h2>Hafıza notları</h2><div class="mut">Buraya yazdıkların her konuşmada modele söylenir. Sohbette "/hatırla bilgi" yazarak da ekleyebilirsin.</div><textarea class="n" id="notes"></textarea><div class="mut">Yüklü dosyalar:</div><div id="flist"></div><p><button class="btn" id="nsave">Kaydet</button></p></div></div>
+<script type="module">
+let webllm=null,loadErr='';
+try{webllm=await import("https://esm.run/@mlc-ai/web-llm")}catch(e){loadErr=String((e&&e.message)||e)}
+const $=i=>document.getElementById(i);
+let engine=null,busy=false,msgs=JSON.parse(localStorage.getItem('ya_chat')||'[]'),files=JSON.parse(localStorage.getItem('ya_files')||'[]');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+const sv=()=>{try{localStorage.setItem('ya_chat',JSON.stringify(msgs.slice(-60)));localStorage.setItem('ya_files',JSON.stringify(files))}catch(e){}};
+const sys=t=>{const d=document.createElement('div');d.className='sys';d.textContent=t;$('log').appendChild(d);$('log').scrollTop=1e9};
+function inline(el,s){const re=/(`[^`]+`|\*\*[^*]+\*\*)/g;let last=0,m;while((m=re.exec(s))){if(m.index>last)el.append(s.slice(last,m.index));const x=m[0];if(x[0]=='`'){const c=document.createElement('code');c.className='i';c.textContent=x.slice(1,-1);el.append(c)}else{const b=document.createElement('b');b.textContent=x.slice(2,-2);el.append(b)}last=m.index+x.length}if(last<s.length)el.append(s.slice(last))}
+function copy(t,b){const ok=()=>{b.textContent='Kopyalandı';setTimeout(()=>b.textContent='Kopyala',1400)};navigator.clipboard?.writeText(t).then(ok,()=>{})}
+const UIF={};addEventListener('message',e=>{const d=e.data;if(d&&d.fid&&UIF[d.fid]&&e.source===UIF[d.fid].contentWindow)UIF[d.fid].style.height=Math.min(700,Math.max(80,d.h))+'px'});
+function uiBlock(el,code,done){const w=document.createElement('div');w.className='cb';const h=document.createElement('div');h.className='h';h.innerHTML='<span>arayüz</span>';w.appendChild(h);
+if(!done){const d=document.createElement('div');d.style.cssText='padding:14px;color:#c4c7c5;font-size:13px';d.textContent='Arayüz hazırlanıyor…';w.appendChild(d);el.appendChild(w);return}
+const id='u'+Math.random().toString(36).slice(2),f=document.createElement('iframe');f.setAttribute('sandbox','allow-scripts');f.style.cssText='width:100%;border:0;height:260px;background:#fff;display:block';
+f.srcdoc='<!DOCTYPE html><meta name=viewport content="width=device-width,initial-scale=1"><style>body{font:15px system-ui;margin:12px;color:#1f1f1f}</style>'+code+'<scr'+'ipt>const r=()=>parent.postMessage({fid:"'+id+'",h:document.documentElement.scrollHeight},"*");addEventListener("load",r);new ResizeObserver(r).observe(document.body)</scr'+'ipt>';UIF[id]=f;w.appendChild(f);el.appendChild(w)}
+function body(el,text){el.textContent='';const re=/```([\w+#.:\/-]*)[^\S\n]*\n?([\s\S]*?)(```|$)/g;let last=0,m;
+const para=s=>{for(const p of s.split(/\n{2,}/)){if(!p.trim())continue;const d=document.createElement('p');inline(d,p.trim());el.appendChild(d)}};
+while((m=re.exec(text))){if(m[0]==='')break;if(m.index>last)para(text.slice(last,m.index));last=m.index+m[0].length;
+if(m[1]=='ui'){uiBlock(el,m[2],m[3]=='```');continue}
+const code=m[2].replace(/\n$/,''),cb=document.createElement('div');cb.className='cb';const h=document.createElement('div');h.className='h';const l=document.createElement('span');l.textContent=m[1]||'kod';const b=document.createElement('button');b.textContent='Kopyala';b.onclick=()=>copy(code,b);h.append(l,b);const pre=document.createElement('pre');pre.textContent=code;cb.append(h,pre);el.appendChild(cb)}
+if(last<text.length)para(text.slice(last))}
+function bubble(role,text){const h=$('hero');if(h)h.remove();const d=document.createElement('div');d.className=role=='user'?'u':'a';if(role=='user')d.textContent=text;else body(d,text);$('log').appendChild(d);$('log').scrollTop=1e9;return d}
+function render(){$('log').innerHTML='';if(!msgs.length){$('log').innerHTML='<div id="hero"><h2>Merhaba</h2><p>Bu model tamamen telefonunda çalışır.</p></div>';return}for(const m of msgs)bubble(m.role,m.content)}
+function ctx(q){const lq=q.toLowerCase();let out='',used=0;for(const f of files){const hit=lq.includes(f.name.split('/').pop().toLowerCase())||/dosya|kod|proje/.test(lq);if(!hit)continue;const c=f.text.slice(0,4000);if(used+c.length>6000)break;used+=c.length;out+='\n=== '+f.name+' ===\n'+c}return out}
+const SYS='Sen "Yerel AI" adlı, tamamen kullanıcının telefonunda çalışan yardımcı bir yapay zekâsın. Türkçe, kısa ve net yanıt ver. Kod istenirse kodu ```dil çiti içinde ver. Etkileşimli arayüz (hesap makinesi, form, mini oyun) istenirse tek parça HTML\'i ```ui çiti içinde ver (CSS ve JS satır içi, dış kaynak yok). Bilmediğin şeyi uydurma.';
+async function send(){const q=$('t').value.trim();if(!q||busy)return;
+if(!engine){sys(webllm?'Önce bir model yükle: sağ üstteki Model düğmesine bas.':'Model kütüphanesi yüklenemedi, internet bağlantısını kontrol et. '+loadErr);if(webllm)$('msheet').style.display='block';return}
+$('t').value='';$('t').style.height='28px';
+if(q.startsWith('/hatırla ')){const n=(localStorage.getItem('ya_notes')||'')+'\n- '+q.slice(9);localStorage.setItem('ya_notes',n.trim());sys('Hafızaya eklendi.');return}
+busy=true;$('go').textContent='■';msgs.push({role:'user',content:q});bubble('user',q);const out=bubble('assistant','…');
+const notes=localStorage.getItem('ya_notes')||'';
+const sysm=SYS+(notes?'\n\nKullanıcı hakkında notlar:\n'+notes:'')+(ctx(q)?'\n\nKullanıcının dosyaları:'+ctx(q):'');
+let ans='';try{const s=await engine.chat.completions.create({messages:[{role:'system',content:sysm},...msgs.slice(-8)],stream:true,temperature:.7,max_tokens:900});
+for await(const c of s){ans+=c.choices[0]?.delta?.content||'';body(out,ans);$('log').scrollTop=1e9}}catch(e){ans=ans||'Hata: '+(e.message||e)}
+msgs.push({role:'assistant',content:ans});sv();busy=false;$('go').textContent='↑'}
+$('go').onclick=()=>{if(busy){engine&&engine.interruptGenerate();return}send()};
+$('t').addEventListener('keydown',e=>{if(e.key=='Enter'&&!e.shiftKey&&innerWidth>700){e.preventDefault();send()}});
+$('t').addEventListener('input',e=>{e.target.style.height='28px';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
+$('newc').onclick=()=>{if(busy)return;msgs=[];sv();render()};
+$('addf').onclick=()=>$('fin').click();
+$('fin').onchange=async e=>{let n=0;for(const f of e.target.files){if(f.size>200000)continue;let t='';try{t=await f.text()}catch(_){continue}if(t.indexOf('\u0000')>=0)continue;files=files.filter(x=>x.name!=f.name);files.push({name:f.name,text:t});n++}sv();sys(n+' dosya eklendi.');e.target.value=''};
+$('memb').onclick=()=>{$('notes').value=localStorage.getItem('ya_notes')||'';const L=$('flist');L.innerHTML='';if(!files.length)L.textContent='(yok)';files.forEach(f=>{const s=document.createElement('button');s.className='pill';s.style.margin='3px';s.textContent=f.name+' ×';s.onclick=()=>{files=files.filter(x=>x!=f);sv();s.remove()};L.appendChild(s)});$('nsheet').style.display='block'};
+$('nsave').onclick=()=>{localStorage.setItem('ya_notes',$('notes').value);$('nsheet').style.display='none'};
+// model listesi
+let list=[];try{const mobile=/iPhone|iPad|Android/.test(navigator.userAgent),lim=mobile?2600:6000;list=webllm.prebuiltAppConfig.model_list.filter(m=>m.vram_required_MB&&m.vram_required_MB<lim&&!/embed|snowflake/i.test(m.model_id)).sort((a,b)=>a.vram_required_MB-b.vram_required_MB)}catch(e){}
+const sel=$('msel');for(const m of list){const o=document.createElement('option');o.value=m.model_id;o.textContent=m.model_id+' (~'+Math.round(m.vram_required_MB/100)/10+' GB bellek)';sel.appendChild(o)}
+const pref=list.find(m=>/Qwen2\.5-1\.5B-Instruct-q4f16/.test(m.model_id))||list.find(m=>/Llama-3\.2-1B/.test(m.model_id));if(pref)sel.value=pref.model_id;
+$('mb').onclick=()=>{$('msheet').style.display='block';if(!navigator.gpu)$('minfo').textContent='Bu tarayıcıda WebGPU yok, model çalışmayabilir. Güncel Safari veya Chrome kullan.'};
+$('mclose').onclick=()=>$('msheet').style.display='none';
+$('mload').onclick=async()=>{if(!webllm){$('mtxt').textContent='Kütüphane yüklenemedi: '+loadErr;return}if(!sel.value||busy)return;$('mload').disabled=true;$('mtxt').textContent='Başlıyor…';
+try{engine=await webllm.CreateMLCEngine(sel.value,{initProgressCallback:p=>{$('bar').firstChild.style.width=Math.round((p.progress||0)*100)+'%';$('mtxt').textContent=p.text||''}});
+$('st').textContent=sel.value.split('-q')[0];$('msheet').style.display='none';sys('Model hazır. Artık internetsiz de çalışır.')}catch(e){engine=null;$('mtxt').textContent='Yüklenemedi: '+(e.message||e)}$('mload').disabled=false};
+render();if(!webllm)sys('Model kütüphanesi yüklenemedi (ilk açılışta internet gerekir): '+loadErr);
+</script></body></html>
